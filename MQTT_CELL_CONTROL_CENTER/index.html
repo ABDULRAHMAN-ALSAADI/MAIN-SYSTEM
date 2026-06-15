@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Robot Cell Factory Supervisor</title>
+<style>
+:root{--bg:#020604;--card:#08170f;--card2:#0d2116;--line:#1e4b31;--txt:#f0fff6;--muted:#9bbfa8;--green:#25ec82;--red:#ff5d5d;--amber:#ffd166;--blue:#68d8ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 16% -8%,#124025 0,#06120b 36%,#020604 78%);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:1px solid var(--line);background:#06110a;color:var(--txt);border-radius:12px;padding:10px 14px;font-weight:850}button:hover{filter:brightness(1.15)}button:disabled{opacity:.38;cursor:not-allowed;filter:none}button.primary{background:#0f8f4e;border-color:var(--green)}button.danger{background:#421010;border-color:#8b2424}button.warn{background:#3a2a08;border-color:#9a7412}input,select{width:100%;border:1px solid var(--line);background:#06110a;color:var(--txt);border-radius:12px;padding:10px;font-weight:750}label{display:block;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}pre{white-space:pre-wrap;overflow:auto;background:#020503;border:1px solid var(--line);border-radius:14px;padding:12px;color:#c8fbdc;max-height:390px}
+header{position:sticky;top:0;z-index:20;background:rgba(2,6,4,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}.head{max-width:1540px;margin:auto;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:14px}.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#10bd65,#07341d);box-shadow:0 0 24px rgba(37,236,130,.25)}h1{margin:0;font-size:23px}.subtitle{font-size:13px;color:var(--muted);margin-top:3px}.top{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:7px 11px;background:#06110a;color:var(--muted);font-weight:850}.dot{width:10px;height:10px;border-radius:50%;background:var(--red)}.dot.ok{background:var(--green)}.dot.warn{background:var(--amber)}
+nav{max-width:1540px;margin:auto;padding:0 22px 16px;display:flex;gap:10px;overflow:auto}nav button{white-space:nowrap}nav button.active{background:#12683c;border-color:var(--green)}
+main{max-width:1540px;margin:auto;padding:20px 22px 70px}.page{display:none}.page.active{display:block}.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.card{background:linear-gradient(180deg,rgba(12,31,20,.94),rgba(5,13,8,.98));border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 18px 60px rgba(0,0,0,.35)}.title{margin:0 0 12px;color:var(--green);font-size:14px;letter-spacing:.13em;text-transform:uppercase}.big{font-size:38px;font-weight:1000;line-height:1.05}.mid{font-size:25px;font-weight:1000}.kv{display:flex;justify-content:space-between;gap:14px;border-bottom:1px solid rgba(255,255,255,.08);padding:9px 0;color:var(--muted)}.kv b{color:var(--txt);text-align:right}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.badge{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:5px 9px;font-weight:900;margin:2px}.ok{color:var(--green)}.bad{color:var(--red)}.warnc{color:var(--amber)}.machine{position:relative;min-height:178px}.machine h3{margin:0;font-size:19px}.machine .state{font-size:27px;font-weight:1000;margin:16px 0 8px}.led{position:absolute;top:18px;right:18px;width:14px;height:14px;border-radius:50%;background:var(--red)}.led.online{background:var(--green);box-shadow:0 0 22px rgba(37,236,130,.55)}.led.warning{background:var(--amber)}.mini{font-size:12px;color:var(--muted);line-height:1.5}.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.flowStep{background:#06110a;border:1px solid var(--line);border-radius:18px;padding:16px;min-height:135px}.flowStep b{display:block;margin:10px 0 6px;font-size:18px}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:8px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:middle}.table th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}.camera{width:100%;border:1px solid var(--line);border-radius:16px;background:#020503;min-height:310px;object-fit:contain}#toast{position:fixed;right:18px;bottom:18px;display:grid;gap:8px;z-index:60}.toast{background:#07130c;border:1px solid var(--line);border-radius:14px;padding:12px;max-width:520px;box-shadow:0 18px 60px rgba(0,0,0,.45)}
+.operatorHero{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,.75fr);gap:16px}.commandCard{padding:24px;background:radial-gradient(circle at 90% 0,rgba(37,236,130,.15),transparent 38%),linear-gradient(145deg,rgba(13,45,27,.98),rgba(4,13,8,.98))}.eyebrow{color:var(--muted);font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:900}.commandState{font-size:46px;line-height:1;font-weight:1000;margin:12px 0}.nextActionBox{border-left:4px solid var(--green);background:rgba(37,236,130,.07);border-radius:0 14px 14px 0;padding:13px 15px;margin-top:16px}.nextActionBox b{display:block;color:var(--green);font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}.heroMeta{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.metricGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}.metric{background:#06110a;border:1px solid var(--line);border-radius:15px;padding:14px}.metric span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}.metric b{display:block;font-size:26px;margin-top:5px}.faultList{display:grid;gap:8px}.faultItem{border:1px solid rgba(255,93,93,.35);background:rgba(255,93,93,.07);border-radius:12px;padding:11px}.faultItem b{display:block;color:var(--red);margin-bottom:3px}.clearState{border:1px solid rgba(37,236,130,.3);background:rgba(37,236,130,.06);border-radius:14px;padding:14px;color:var(--green);font-weight:900}.missionPipeline{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px}.missionStep{position:relative;border:1px solid var(--line);background:#06110a;border-radius:15px;padding:14px;min-height:130px;opacity:.58}.missionStep .num{display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--line);border-radius:50%;font-weight:1000;margin-bottom:10px}.missionStep b{display:block;font-size:16px;margin-bottom:5px}.missionStep.active{opacity:1;border-color:var(--green);box-shadow:0 0 0 1px rgba(37,236,130,.18),0 12px 34px rgba(0,0,0,.3)}.missionStep.active .num,.missionStep.complete .num{background:var(--green);border-color:var(--green);color:#021007}.missionStep.complete{opacity:.9;border-color:rgba(37,236,130,.4)}.missionStep.error{opacity:1;border-color:var(--red)}.boxProgress{display:grid;gap:13px}.boxLine{background:#06110a;border:1px solid var(--line);border-radius:14px;padding:13px}.boxHead{display:flex;justify-content:space-between;gap:10px;margin-bottom:9px}.progressTrack{height:9px;border-radius:99px;background:#020503;overflow:hidden;border:1px solid rgba(255,255,255,.07)}.progressFill{height:100%;border-radius:99px;background:var(--green)}.progressFill.RED{background:#ff5d5d}.progressFill.GREEN{background:#25ec82}.progressFill.BLUE{background:#68d8ff}.healthGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.healthItem{position:relative;background:#06110a;border:1px solid var(--line);border-radius:14px;padding:14px}.healthItem b{display:block;font-size:16px;margin-bottom:8px}.healthItem .led{top:14px;right:14px}.timelineList{display:grid;gap:8px}.timelineItem{display:grid;grid-template-columns:70px 110px 1fr;gap:10px;border-bottom:1px solid rgba(255,255,255,.07);padding:8px 0}.timelineItem span{color:var(--muted);font-size:12px}.planStatus{font-size:11px;margin-left:7px}.planStatus.online{color:var(--green)}.planStatus.offline{color:var(--red)}.planStatus.warning{color:var(--amber)}
+.cameraWrap{position:relative;width:100%}.cameraWrap .camera{display:block}.calibrationTarget{display:none;position:absolute;left:34.375%;top:29.167%;width:31.25%;height:41.667%;border:3px dashed var(--amber);border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.16);pointer-events:none}.calibrationTarget span{position:absolute;left:50%;top:-34px;transform:translateX(-50%);white-space:nowrap;background:#3a2a08;border:1px solid var(--amber);border-radius:999px;padding:5px 9px;color:var(--amber);font-weight:900;font-size:12px}.cameraWrap.calibrating .calibrationTarget{display:block}.profileGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.profileItem{border:1px solid var(--line);border-radius:14px;background:#06110a;padding:12px}.profileItem b{display:block;margin-bottom:5px}.profileItem.saved{border-color:var(--green)}.calibrationSteps{counter-reset:step;display:grid;gap:8px;margin:12px 0}.calibrationSteps div{position:relative;padding-left:34px;color:var(--muted)}.calibrationSteps div:before{counter-increment:step;content:counter(step);position:absolute;left:0;top:-2px;width:24px;height:24px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;color:var(--green);font-weight:1000}.servoSliderRow{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;margin:14px 0}.servoSliderRow input{padding:0;accent-color:var(--green)}.servoAngleValue{min-width:72px;text-align:center;border:1px solid var(--green);border-radius:12px;padding:9px;color:var(--green);font-size:20px;font-weight:1000}
+@media(max-width:1100px){.g4,.g3,.flow,.metricGrid{grid-template-columns:1fr 1fr}.operatorHero{grid-template-columns:1fr}.missionPipeline{grid-template-columns:repeat(3,1fr)}.big{font-size:30px}}@media(max-width:760px){.g4,.g3,.g2,.flow,.metricGrid,.missionPipeline,.healthGrid{grid-template-columns:1fr}.head{flex-direction:column;align-items:flex-start}.commandState{font-size:36px}.timelineItem{grid-template-columns:55px 1fr}.timelineItem div{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header><div class="head"><div class="brand"><div class="logo"></div><div><h1>Robot Cell Factory Supervisor</h1><div class="subtitle">Conveyor sorts -> filled boxes queue -> SCARA loads AMR -> operator finishes delivery</div></div></div><div class="top"><span class="pill"><span id="mqttDot" class="dot"></span>MQTT <b id="mqttTop">-</b></span><span class="pill"><span id="cellDot" class="dot"></span>Cell <b id="cellTop">-</b></span><span class="pill">Mission <b id="missionTop">-</b></span></div></div>
+<nav><button class="active" onclick="showPage('main',this)">Main</button><button onclick="showPage('workflow',this)">Workflow</button><button onclick="showPage('conveyor',this)">Conveyor + Vision</button><button onclick="showPage('amr',this)">AMR</button><button onclick="showPage('arm',this)">Arm</button><button onclick="showPage('connections',this)">Connections</button><button onclick="showPage('settings',this)">Settings</button><button onclick="showPage('logs',this)">Logs</button></nav></header>
+
+<main>
+<section id="main" class="page active">
+  <div class="operatorHero">
+    <div class="card commandCard">
+      <div class="eyebrow">Live Cell Command</div>
+      <div id="cellState" class="commandState">-</div>
+      <div class="nextActionBox"><b>Operator Next Action</b><div id="nextAction">-</div></div>
+      <div class="heroMeta">
+        <span class="badge">Job <b id="jobId">-</b></span>
+        <span class="badge">Mission <b id="missionStage">-</b></span>
+        <span class="badge">Mode <b id="amrMode">-</b></span>
+        <span class="badge">Active box <b id="activeBoxMain">-</b></span>
+      </div>
+      <div class="actions"><button class="primary" onclick="preflight()">Run Preflight</button><button onclick="showPage('settings',document.querySelector('nav button:nth-child(7)'))">Open Settings</button><button onclick="api('/api/job/reset')">Reset Mission</button><button class="danger" onclick="api('/api/stop-all')">Stop All</button></div>
+      <div class="metricGrid">
+        <div class="metric"><span>Connected Services</span><b id="readyCount">0/4</b></div>
+        <div class="metric"><span>Boxes In Progress</span><b id="boxesInProgress">0</b></div>
+        <div class="metric"><span>Delivered</span><b id="deliveredTotal">0</b></div>
+        <div class="metric"><span>Queued Filled Boxes</span><b id="pendingCount">0</b></div>
+      </div>
+    </div>
+    <div class="card"><h2 class="title">Attention Required</h2><div id="mainFaults" class="faultList"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><div class="kv"><span><h2 class="title" style="margin:0">Active Mission Route</h2></span><b id="missionName">No active mission</b></div><div id="missionPipeline" class="missionPipeline"></div></div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card"><h2 class="title">Box Loading</h2><div id="mainBoxProgress" class="boxProgress"></div></div>
+    <div class="card"><h2 class="title">Device Health</h2><div id="overviewCards" class="healthGrid"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h2 class="title">Recent Cell Activity</h2><div id="mainTimeline" class="timelineList"></div></div>
+</section>
+
+<section id="workflow" class="page">
+  <div class="grid g2">
+    <div class="card">
+      <h2 class="title">Workflow Runtime View</h2>
+      <p class="mini">This page explains the live automation path. The editable system workflow rules are now in Settings, like v18.</p>
+      <pre>Continuous production loop:
+1. Conveyor + Vision detects only RED / GREEN / BLUE cubes and fills the matching box.
+2. Conveyor sends box filled event to the coordinator.
+3. Coordinator reads the Workflow Rule for that color.
+4. If another job is active, the filled box waits in the queue.
+5. Coordinator starts the matching arm recipe: GREEN_BOX_A1, RED_BOX, or BLUE_BOX.
+6. Arm moves the filled box from the conveyor onto the AMR.
+7. Operator manually drives the AMR, drops the box, and returns the AMR.
+8. Operator presses Finished Job in the AMR tab.
+9. Coordinator resets that box and automatically starts the next queued filled box.</pre>
+      <div class="actions">
+        <button class="primary" onclick="showPage('settings',document.querySelector('nav button:nth-child(7)'))">Open Workflow Settings</button>
+        <button onclick="preflight()">Run Preflight</button>
+        <button onclick="api('/api/sim/full')">Run Full Simulation</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="title">Current Rule Summary</h2>
+      <div id="workflowSummary">Open Settings to load/edit rules.</div>
+    </div>
+  </div>
+</section>
+
+<section id="conveyor" class="page">
+  <div class="grid g2"><div class="card"><h2 class="title">Processed Camera</h2><div id="cvCameraWrap" class="cameraWrap"><img class="camera" src="/cv/processed.mjpg"><div class="calibrationTarget"><span>Fill this box with the cube</span></div></div><div class="actions"><button onclick="api('/api/cv/restart')">Restart OpenCV</button><button class="primary" onclick="runCheck('conveyor')">Check Conveyor</button><button class="warn" onclick="simulateCubePrompt()">Simulate Cube</button></div></div><div class="card"><h2 class="title">Box Counters</h2><div id="boxCards" class="grid g3"></div><div class="actions"><button class="danger" onclick="api('/api/boxes/reset',{color:'ALL'})">Reset All</button><button class="warn" onclick="forceFilledPrompt()">Force Filled</button></div><pre id="conveyorCheck">-</pre></div></div>
+  <div class="card" style="margin-top:16px">
+    <h2 class="title">Sorter Servo Calibration</h2>
+    <p class="mini">Clear the conveyor first. Release the slider to move the sorter toward a box, then save that angle as RED, GREEN, BLUE, or CENTER. Automatic sorting stays at the last confirmed color and only moves when the next cube color is confirmed. CENTER is manual calibration only.</p>
+    <div class="kv"><span>Last servo response</span><b id="cvServoStatus">-</b></div>
+    <div class="kv"><span>Automatic sorter state</span><b id="cvSorterState">-</b></div>
+    <div class="servoSliderRow">
+      <input id="sorterServoAngle" type="range" min="0" max="180" value="90" oninput="updateSorterSliderValue(this.value)" onchange="moveSorterServo(this.value)">
+      <div id="sorterServoAngleValue" class="servoAngleValue">90 deg</div>
+    </div>
+    <div id="sorterSavedAngles" class="profileGrid"></div>
+    <div class="actions"><button onclick="moveSorterServo($('sorterServoAngle').value)">Move to Slider Angle</button><button class="danger" onclick="saveSorterAngle('R')">Save as RED</button><button class="primary" onclick="saveSorterAngle('G')">Save as GREEN</button><button onclick="saveSorterAngle('B')">Save as BLUE</button><button class="warn" onclick="saveSorterAngle('CENTER')">Save as CENTER</button></div>
+    <div class="actions"><button class="danger" onclick="testSorterServo('R')">Test Saved RED</button><button class="primary" onclick="testSorterServo('G')">Test Saved GREEN</button><button onclick="testSorterServo('B')">Test Saved BLUE</button><button class="warn" onclick="testSorterServo('CENTER')">Return to Saved CENTER</button></div>
+    <pre id="cvServoResult">No manual servo movement yet.</pre>
+  </div>
+  <div class="card" style="margin-top:16px"><h2 class="title">Teach Camera Color</h2><p class="mini">Use this when a real cube is not detected. The saved profile survives restarts and supplements the strict RED/GREEN/BLUE detector. Dark or black samples are refused.</p><div class="calibrationSteps"><div>Press Show Center Target.</div><div>Hold only the cube inside the center target until the image is steady.</div><div>Select its intended color and press Save Camera Sample.</div></div><div class="grid g3"><div><label>Save object as</label><select id="cvCalibrationColor"><option value="GREEN">GREEN</option><option value="RED">RED</option><option value="BLUE">BLUE</option></select></div><div><label>Camera state</label><div id="cvCalibrationCameraState" class="badge">-</div></div><div><label>Current detection</label><div id="cvCalibrationDetection" class="badge">-</div></div></div><div class="actions"><button onclick="toggleCalibrationGuide()">Show Center Target</button><button class="primary" onclick="captureColorCalibration()">Save Camera Sample</button><button class="danger" onclick="resetColorCalibration()">Reset Selected Profile</button></div><div id="cvCalibrationProfiles" class="profileGrid"></div><pre id="cvCalibrationResult">No calibration action yet.</pre></div>
+</section>
+
+<section id="amr" class="page">
+  <div class="card" style="margin-bottom:16px;border-color:var(--green)"><h2 class="title">Manual Delivery Completion</h2><p class="mini">After the arm loads the box, manually deliver it and return the AMR to the arm. Press Finished Job only when the AMR is back and ready for the next box.</p><div class="grid g3"><div class="kv"><span>Active loaded box</span><b id="amrActiveBox">-</b></div><div class="kv"><span>Active job</span><b id="amrActiveJob">-</b></div><div class="kv"><span>Queued boxes</span><b id="amrQueuedBoxes">0</b></div></div><div class="actions"><button id="amrFinishedJobButton" class="primary" onclick="finishAmrJob()" disabled>Finished Job - Start Next Box</button></div><pre id="amrFinishResult">Waiting for the arm to load a box onto the AMR.</pre></div>
+  <div class="grid g2"><div class="card"><h2 class="title">AMR Monitor</h2><div class="kv"><span>IP</span><b id="amrIpView">-</b></div><div class="kv"><span>State</span><b id="amrStateView">-</b></div><div class="kv"><span>HTTP</span><b id="amrHttpView">-</b></div><div class="actions"><button class="primary" onclick="runCheck('amr')">Check AMR</button><button onclick="refreshAmrReal()">Refresh Status</button><button class="danger" onclick="amrHttpStop()">Stop AMR</button></div><pre id="amrCheck">-</pre></div><div class="card"><h2 class="title">AMR Manual Control</h2><div class="grid g3"><div><label>X mm</label><input id="amrX" type="number" value="0"></div><div><label>Y mm</label><input id="amrY" type="number" value="0"></div><div><label>TH deg</label><input id="amrTh" type="number" value="0"></div></div><div class="actions"><button class="primary" onclick="amrHttpGo()">Go To</button><button onclick="amrHttpResetOdom()">Reset Odom</button></div><div class="grid g2" style="margin-top:14px"><div><label>Left RPM</label><input id="amrLeft" type="number" value="0"></div><div><label>Right RPM</label><input id="amrRight" type="number" value="0"></div></div><div class="actions"><button onclick="amrHttpDrive()">Drive</button><button class="danger" onclick="amrHttpDriveStop()">Drive Stop</button></div></div></div>
+  <div class="grid g2" style="margin-top:16px"><div class="card"><h2 class="title">Optional Manual Route Tools</h2><p class="mini">These tools are optional for manual AMR operation. The production box queue never runs an AMR route automatically.</p><div class="grid g2"><div><label>Recipe index</label><select id="amrRouteIdx"><option value="0">0 - RED_BOX_TO_TARGET</option><option value="1">1 - GREEN_BOX_TO_TARGET</option><option value="2">2 - BLUE_BOX_TO_TARGET</option><option value="3">3 - RECIPE_4</option><option value="4">4 - RECIPE_5</option><option value="5">5 - RECIPE_6</option></select></div><div><label>Wait ms</label><input id="amrWait" type="number" value="300"></div></div><div class="actions"><button onclick="refreshAmrRoutes()">Refresh Routes</button><button onclick="amrHttpSaveCurrent()">Save Current Pose</button><button class="primary" onclick="amrHttpRunRoute()">Run HTTP</button><button onclick="amrMqttRunRoute()">Run MQTT</button><button class="warn" onclick="amrHttpDeleteLast()">Delete Last</button><button class="danger" onclick="amrHttpClearRoute()">Clear</button></div><div id="amrRoutesBox" style="margin-top:12px"></div></div><div class="card"><h2 class="title">Optional MQTT Manual Test</h2><p class="mini">Use these only for manual testing. The production workflow does not send them.</p><div class="actions"><button onclick="amrMqttStatus()">MQTT STATUS</button><button onclick="amrMqttPick('RED')">Test RED</button><button onclick="amrMqttPick('GREEN')">Test GREEN</button><button onclick="amrMqttPick('BLUE')">Test BLUE</button></div><pre id="amrTestOut">-</pre></div></div>
+</section>
+
+<section id="arm" class="page">
+  <div class="grid g2"><div class="card"><h2 class="title">SCARA Arm Monitor</h2><div class="kv"><span>IP</span><b id="armIpView">-</b></div><div class="kv"><span>State</span><b id="armStateView">-</b></div><div class="kv"><span>HTTP</span><b id="armHttpView">-</b></div><p class="mini">Retry Active Arm Job refreshes recipes and starts the arm for the currently filled box. Make sure the arm area is clear before pressing it.</p><div class="actions"><button class="primary" onclick="runCheck('arm')">Check Arm</button><button onclick="refreshArmStatus()">Refresh Status</button><button class="warn" onclick="retryActiveArmJob()">Retry Active Arm Job</button><button onclick="api('/api/arm/startup-confirm')">Confirm Startup</button><button class="warn" onclick="api('/api/arm/home')">Home</button><button onclick="api('/api/arm/off')">Motors Off</button><button class="danger" onclick="api('/api/abort-arm')">Abort</button></div><pre id="armCheck">-</pre></div><div class="card"><h2 class="title">SCARA Arm Recipes</h2><p class="mini">Arm recipes live in the arm controller. Refresh here, then use workflow rules to map colors to recipe names.</p><div class="grid g2"><div><label>Recipe index</label><input id="armRecipeIndex" type="number" value="0"></div><div><label>Package/recipe name</label><input id="armPackageName" value="TEST_RECIPE"></div></div><div class="actions"><button onclick="api('/api/refresh-recipes')">Refresh Arm Recipes</button><button onclick="armLoadRecipe()">Load Recipe</button><button class="primary" onclick="armStartLoaded()">Start Loaded</button><button class="warn" onclick="armRunRecipeTest()">Load + Start Test</button></div><div id="armRecipeBox" style="margin-top:12px"></div></div></div>
+</section>
+
+<section id="connections" class="page">
+  <div class="grid g2"><div class="card"><h2 class="title">Network + MQTT</h2><div class="kv"><span>Dashboard MQTT</span><b>127.0.0.1:1883</b></div><div class="kv"><span>Laptop broker address</span><b>192.168.137.1:1883</b></div><div class="kv"><span>AMR IP</span><b id="connAmrIp">-</b></div><div class="kv"><span>Arm IP</span><b id="connArmIp">-</b></div><div class="kv"><span>Conveyor IP</span><b id="connConvIp">-</b></div><div class="actions"><button onclick="api('/api/start-broker')">Start Broker</button><button onclick="api('/api/connect-mqtt')">Connect MQTT</button><button class="primary" onclick="runCheck('mqtt')">Check MQTT</button><button onclick="scanDevices()">Scan Network</button><button onclick="applyDiscovery()">Apply Found IPs</button></div><pre id="mqttCheck">-</pre></div><div class="card"><h2 class="title">MQTT Topics</h2><pre>cell/conveyor/package
+cell/conveyor/box_filled
+cell/amr/cmd
+cell/amr/status
+cell/amr/event
+cell/arm/status
+cell/arm/event
+cell/coordinator/status
+cell/coordinator/event</pre></div></div>
+</section>
+
+<section id="settings" class="page">
+  <div class="grid g2">
+    <div class="card">
+      <h2 class="title">Network Settings</h2>
+      <p class="mini">These are the addresses the coordinator uses to monitor and command every subsystem. ESP32 arm web uses HTTP port 80. MQTT broker uses port 1883 on the laptop, not on the arm.</p>
+      <div class="grid g2">
+        <div><label>Broker IP used by dashboard</label><input id="broker" value="127.0.0.1"></div>
+        <div><label>MQTT Port</label><input id="port" type="number" value="1883"></div>
+        <div><label>SCARA Arm IP</label><input id="armIpInput" placeholder="example: 192.168.137.40"></div>
+        <div><label>AMR IP</label><input id="amrIpInput" placeholder="example: 192.168.137.41"></div>
+        <div><label>Conveyor / Vision IP</label><input id="conveyorIpInput" placeholder="example: 192.168.137.42"></div>
+        <div><label>Network scan subnet</label><input id="scanSubnet" value="192.168.137"></div>
+      </div>
+      <div class="actions">
+        <button class="primary" onclick="applySettings()">Save Settings</button>
+        <button onclick="scanDevicesCustom()">Scan Network</button>
+        <button onclick="applyDiscovery()">Apply Found IPs</button>
+        
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="title">Operation Settings</h2>
+      <p class="mini">These settings control the whole automation behavior, not only one robot.</p>
+      <div class="grid g2">
+        <div><label>Box capacity</label><input id="boxCapacity" type="number" min="1" value="4"></div>
+        <div><label>Auto coordinator</label><select id="autoCoordinate"><option value="true">ON - automatic workflow</option><option value="false">OFF - monitor only</option></select></div>
+        <div><label>AMR workflow</label><select id="simulateAmr"><option value="false">Manual operator control</option></select></div>
+        <div><label>Next arm job starts</label><input value="After Finished Job button" disabled></div>
+      </div>
+      <div class="actions">
+        <button class="primary" onclick="applySettings()">Save Operation Settings</button>
+        <button onclick="api('/api/start-broker')">Start Broker</button>
+        <button onclick="api('/api/connect-mqtt')">Connect MQTT</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <h2 class="title">System Controls</h2>
+      <p class="mini">Same idea as v18: one place to control the whole system.</p>
+      <div class="actions">
+        <button onclick="api('/api/refresh-recipes')">Refresh Arm Recipes</button>
+        <button onclick="api('/api/cv/restart')">Restart OpenCV</button>
+        <button class="danger" onclick="api('/api/boxes/reset',{color:'ALL'})">Reset All Box Counts</button>
+        <button onclick="runCheck('arm')">Test Arm</button>
+        <button onclick="runCheck('amr')">Test AMR</button>
+        <button onclick="runCheck('conveyor')">Test Conveyor</button>
+        <button onclick="runCheck('mqtt')">Test MQTT</button>
+        <button class="danger" onclick="api('/api/stop-all')">Stop All</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="title">Saved Connection Plan</h2>
+      <p class="mini">These are the saved addresses currently used by the coordinator. They update after Save Settings or Apply Found IPs.</p>
+      <div class="kv"><span>Dashboard MQTT</span><b id="settingsBrokerIp">-</b></div>
+      <div class="kv"><span>Laptop broker address</span><b>192.168.137.1:1883</b></div>
+      <div class="kv"><span>Arm</span><b><span id="settingsArmIp">-</span><span id="settingsArmStatus" class="planStatus">-</span></b></div>
+      <div class="kv"><span>AMR</span><b><span id="settingsAmrIp">-</span><span id="settingsAmrStatus" class="planStatus">-</span></b></div>
+      <div class="kv"><span>Conveyor</span><b><span id="settingsConvIp">-</span><span id="settingsConvStatus" class="planStatus">-</span></b></div>
+      <div class="actions"><button onclick="reloadSavedPlan()">Reload Saved Plan</button><button class="primary" onclick="applySettings()">Save Current Fields</button></div>
+      <pre id="ipSaveResult">Waiting for connection changes.</pre>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2 class="title">Workflow Rules</h2>
+    <p class="mini">Map each filled color box to its SCARA arm recipe. AMR delivery is manual, and Finished Job releases the next queued box.</p>
+    <pre>Example system flow:
+RED_BOX_FLOW
+  When conveyor sends: BoxRed_filled
+  Wait before Arm: 0 ms
+  Run arm recipe: RED_BOX
+  Arm loaded event: BoxRed_loaded_on_amr
+  Operator manually delivers and returns the AMR
+  Operator presses: Finished Job
+  Next queued filled box starts automatically.</pre>
+    <div id="workflowTable"></div>
+    <div class="grid g3" style="margin-top:12px">
+      <input id="newRuleColor" placeholder="COLOR e.g. BLUE">
+      <button onclick="addRuleFromSettings()">Add Rule</button>
+      <button class="primary" onclick="saveWorkflow()">Save Workflow Rules</button>
+    </div>
+    <div class="actions">
+      <button onclick="loadWorkflow()">Reload Rules</button>
+      <button onclick="api('/api/refresh-recipes')">Refresh Arm Recipe Names</button>
+      <button onclick="refreshAmrRoutes()">Refresh AMR Route Names</button>
+    </div>
+  </div>
+</section>
+
+<section id="logs" class="page"><div class="grid g2"><div class="card"><h2 class="title">Event Log</h2><pre id="logBox">-</pre></div><div class="card"><h2 class="title">Last Payloads</h2><pre id="payloadBox">-</pre></div></div></section>
+</main><div id="toast"></div>
+
+<script>
+let S={}, workflow=[], routeLoaded=false, settingsDirty=false, loadInFlight=false, sorterSliderInitialized=false;
+const COLORS=['RED','GREEN','BLUE'];
+function $(x){return document.getElementById(x)}function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}function toast(s){const d=document.createElement('div');d.className='toast';d.textContent=s;$('toast').appendChild(d);setTimeout(()=>d.remove(),3500)}
+function showPage(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');b.classList.add('active');if(id==='workflow')loadWorkflow();if(id==='settings')loadWorkflow();if(id==='amr'&&!routeLoaded){routeLoaded=true;refreshAmrRoutes()}}
+async function post(path,body=null){const opt={method:'POST',headers:{'Content-Type':'application/json'}};if(body!==null)opt.body=JSON.stringify(body);const r=await fetch(path,opt);return await r.json().catch(async()=>({raw:await r.text()}))}async function get(path){const r=await fetch(path);return await r.json()}async function api(path,body=null){try{const j=await post(path,body);toast(j.ok===false?`Failed: ${path}`:`OK: ${path}`);await load();return j}catch(e){toast('Error '+e);return {ok:false,error:String(e)}}}
+function node(n){return (S.nodes&&S.nodes[n])||{}}
+function missionStageIndex(state){
+  if(['BOX_FILLED','BOX_FILLED_MONITOR_ONLY'].includes(state))return 1;
+  if(['ARM_LOADING_AMR','ARM_RUNNING','BOX_READY_FOR_ARM'].includes(state))return 2;
+  if(['BOX_LOADED_ON_AMR','WAITING_OPERATOR_FINISH'].includes(state))return 3;
+  if(state==='JOB_DONE')return 4;
+  return 0;
+}
+function healthCard(k,title){
+  if(k==='mqtt'){
+    const led=S.mqttConnected?'online':'offline';
+    return `<div class="healthItem"><span class="led ${led}"></span><b>${title}</b><div class="mini">${S.mqttConnected?'CONNECTED':'OFFLINE'}</div><div class="mini">${esc((S.config||{}).broker_ip||'127.0.0.1')}:${esc((S.config||{}).broker_port||1883)}</div></div>`;
+  }
+  const n=node(k);
+  return `<div class="healthItem"><span class="led ${esc(n.led||'offline')}"></span><b>${title}</b><div class="mini">${esc(n.state||'UNKNOWN')} · HTTP ${esc(n.http||'UNKNOWN')}</div><div class="mini">${n.ip?esc(n.ip):'IP not configured'}</div></div>`;
+}
+function renderCards(){$('overviewCards').innerHTML=[healthCard('mqtt','MQTT Broker'),healthCard('conveyor','Conveyor + Vision'),healthCard('amr','AMR'),healthCard('arm','SCARA Arm')].join('')}
+function renderMain(){
+  const active=!!S.activeBoxName&&!['IDLE','BOOTING'].includes(S.missionState);
+  const faults=S.faults||[];
+  const counts=S.boxCounts||{};
+  const states=S.boxStates||{};
+  const cap=Number((S.config||{}).box_capacity||S.boxCapacity||4);
+  const connected=[S.mqttConnected,node('conveyor').led==='online',node('amr').led==='online',node('arm').led==='online'].filter(Boolean).length;
+  const stage=missionStageIndex(S.missionState);
+  const pipeline=[
+    ['Detect & Fill',node('conveyor').state||'Waiting for cube'],
+    ['Filled Box Queue',`${(S.queuedBoxes||[]).length} waiting`],
+    ['Arm Recipe',active?(S.activeBoxRecipe||'Recipe pending'):'Waiting'],
+    ['Manual AMR Delivery',S.missionState==='WAITING_OPERATOR_FINISH'?'Press Finished Job when AMR returns':'Waiting'],
+    ['Finished Job',`${(S.doneJobs||[]).length} completed`]
+  ];
+
+  $('mqttTop').textContent=S.mqttConnected?'CONNECTED':'OFFLINE';
+  $('mqttDot').className='dot '+(S.mqttConnected?'ok':'');
+  $('cellTop').textContent=S.system||'-';
+  $('cellDot').className='dot '+(faults.length?'warn':'ok');
+  $('missionTop').textContent=active?S.activeBoxName:'None';
+  $('cellState').textContent=S.system||'-';
+  $('nextAction').textContent=S.nextAction||'Monitor the cell.';
+  $('missionName').textContent=active?`${S.activeBoxName} · ${S.activeBoxRecipe||'recipe pending'}`:'No active mission';
+  $('jobId').textContent=S.currentJob||'-';
+  $('missionStage').textContent=S.missionState||'-';
+  $('amrMode').textContent='Manual AMR';
+  $('activeBoxMain').textContent=S.activeBoxName||'-';
+  $('readyCount').textContent=`${connected}/4`;
+  $('boxesInProgress').textContent=COLORS.filter(c=>Number(counts[c]||0)>0).length;
+  $('deliveredTotal').textContent=(S.doneJobs||[]).length;
+  $('pendingCount').textContent=(S.queuedBoxes||[]).length;
+
+  $('mainFaults').innerHTML=faults.length
+    ? faults.slice(0,5).map(f=>`<div class="faultItem"><b>${esc(f.code||'FAULT')}</b><div class="mini">${esc(f.message||'Check subsystem status.')}</div></div>`).join('')
+    : '<div class="clearState">No active coordinator faults.</div>';
+
+  $('missionPipeline').innerHTML=pipeline.map((item,i)=>{
+    let cls=i<stage?'complete':i===stage?'active':'';
+    if(['FAULT','STOPPED'].includes(S.missionState)&&i===stage)cls='error';
+    return `<div class="missionStep ${cls}"><span class="num">${i<stage?'✓':i+1}</span><b>${item[0]}</b><div class="mini">${esc(item[1])}</div></div>`;
+  }).join('');
+
+  $('mainBoxProgress').innerHTML=COLORS.map(color=>{
+    const count=Number(counts[color]||0);
+    const pct=Math.min(100,Math.round(count/Math.max(1,cap)*100));
+    const label=color;
+    return `<div class="boxLine"><div class="boxHead"><b>${label}</b><span>${count}/${cap} · ${esc(states[color]||'FILLING')}</span></div><div class="progressTrack"><div class="progressFill ${color}" style="width:${pct}%"></div></div></div>`;
+  }).join('');
+
+  $('mainTimeline').innerHTML=(S.timeline||[]).slice(0,6).map(e=>`<div class="timelineItem"><span>${esc(e.t||'')}</span><b>${esc(e.source||'CELL')}</b><div>${esc(e.text||'')}</div></div>`).join('')||'<div class="mini">No recent activity.</div>';
+}
+function renderBoxes(){const c=S.boxCounts||{},cap=(S.config&&S.config.box_capacity)||4;$('boxCards').innerHTML=COLORS.map(x=>`<div class="card"><h3>${x}</h3><div class="big">${c[x]||0}/${cap}</div><div class="actions"><button onclick="api('/api/boxes/adjust',{color:'${x}',delta:1})">+1</button><button onclick="api('/api/boxes/adjust',{color:'${x}',delta:-1})">-1</button><button class="warn" onclick="forceFilled('${x}')">Force Filled</button></div></div>`).join('')}
+function renderCalibration(){
+  const profiles=(S.config&&S.config.cv_color_profiles)||{};
+  const angles=(S.config&&S.config.sorter_servo_angles)||{R:30,G:85,B:150,CENTER:90};
+  const cv=S.cv||{};
+  $('cvCalibrationCameraState').textContent=cv.state||node('conveyor').state||'-';
+  $('cvCalibrationDetection').textContent=(cv.detectedColor||'NO COLOR')+(cv.usingLearnedProfile?' · LEARNED PROFILE':'');
+  $('cvServoStatus').textContent=cv.lastServo||'-';
+  $('cvSorterState').textContent=cv.sorterState||'IDLE';
+  $('sorterSavedAngles').innerHTML=[['RED','R'],['GREEN','G'],['BLUE','B'],['CENTER','CENTER']].map(([name,code])=>`<div class="profileItem saved"><b>${name}</b><div class="mini">${Number(angles[code]??0)} degrees</div></div>`).join('');
+  if(!sorterSliderInitialized){
+    $('sorterServoAngle').value=Number(angles.CENTER??90);
+    updateSorterSliderValue($('sorterServoAngle').value);
+    sorterSliderInitialized=true;
+  }
+  $('cvCalibrationProfiles').innerHTML=COLORS.map(color=>{
+    const profile=profiles[color];
+    return `<div class="profileItem ${profile?'saved':''}"><b>${color}</b><div class="mini">${profile?`Learned ${esc(profile.learnedAt||'')} · HSV ${esc((profile.hsvCenter||[]).join(', '))}`:'Default detector only'}</div></div>`;
+  }).join('');
+}
+function renderSub(){const a=node('amr'),r=node('arm'),c=node('conveyor'),q=S.queuedBoxes||[];amrIpView.textContent=a.ip||'-';amrStateView.textContent=a.state||'-';amrHttpView.textContent=a.http||'-';armIpView.textContent=r.ip||'-';armStateView.textContent=r.state||'-';armHttpView.textContent=r.http||'-';connAmrIp.textContent=a.ip||'-';connArmIp.textContent=r.ip||'-';connConvIp.textContent=c.ip||'-';amrActiveBox.textContent=S.activeBoxName||'-';amrActiveJob.textContent=S.activeBoxName?(S.currentJob||'-'):'-';amrQueuedBoxes.textContent=q.length?`${q.length}: ${q.map(x=>x.box||x.color).join(', ')}`:'0';amrFinishedJobButton.disabled=S.missionState!=='WAITING_OPERATOR_FINISH'}
+function renderArmRecipes(){const r=S.recipes||[];$('armRecipeBox').innerHTML=r.length?`<table class="table"><tr><th>#</th><th>Name</th></tr>${r.map((x,i)=>`<tr><td>${x.index??i}</td><td>${esc(x.name||x)}</td></tr>`).join('')}</table>`:'<div class="mini">No arm recipes loaded. Press Refresh Arm Recipes.</div>'}
+function renderLogs(){$('logBox').textContent=(S.logs||[]).slice(0,120).map(x=>typeof x==='string'?x:`${x.t||''} ${x.msg||JSON.stringify(x)}`).join('\n')||'-';$('payloadBox').textContent=JSON.stringify({lastCommand:S.lastCommand,amr:node('amr').last,arm:node('arm').last,conveyor:node('conveyor').last},null,2)}
+function renderPlanStatus(id,key){
+  const n=node(key),el=$(id),configured=String((S.config||{})[`${key}_ip`]||'').trim();
+  const status=!configured?'NOT SET':n.http==='ONLINE'?'HTTP ONLINE':n.led==='online'?'MQTT ONLINE':n.http==='OFFLINE'?'HTTP OFFLINE':n.state||'UNKNOWN';
+  el.textContent=status;
+  el.className='planStatus '+(!configured||n.http==='OFFLINE'?'offline':n.http==='ONLINE'||n.led==='online'?'online':'warning');
+}
+function renderConnectionPlan(){
+  const c=S.config||{};
+  $('settingsBrokerIp').textContent=`${c.broker_ip||'127.0.0.1'}:${c.broker_port||1883}`;
+  $('settingsArmIp').textContent=c.arm_ip||'Not configured';
+  $('settingsAmrIp').textContent=c.amr_ip||'Not configured';
+  $('settingsConvIp').textContent=c.conveyor_ip||'Not configured';
+  renderPlanStatus('settingsArmStatus','arm');
+  renderPlanStatus('settingsAmrStatus','amr');
+  renderPlanStatus('settingsConvStatus','conveyor');
+}
+function renderSettings(){
+  const editing=document.activeElement&&['INPUT','SELECT'].includes(document.activeElement.tagName);
+  const c=S.config||{};
+  renderConnectionPlan();
+
+  if(!settingsDirty&&!editing){
+    $('broker').value=c.broker_ip||'127.0.0.1';
+    $('port').value=c.broker_port||1883;
+    $('armIpInput').value=c.arm_ip||'';
+    $('amrIpInput').value=c.amr_ip||'';
+    $('conveyorIpInput').value=c.conveyor_ip||'';
+    $('boxCapacity').value=c.box_capacity||4;
+    $('autoCoordinate').value=String(c.auto_coordinate!==false);
+    $('simulateAmr').value='false';
+    if(!$('scanSubnet').value)$('scanSubnet').value=(S.discovery&&S.discovery.subnet)||'192.168.137';
+  }
+
+}
+async function load(){
+  if(loadInFlight)return;
+  loadInFlight=true;
+  try{S=await get('/api/state');renderMain();renderCards();renderBoxes();renderCalibration();renderSub();renderArmRecipes();renderLogs();renderSettings()}
+  catch(e){console.error('Dashboard refresh failed',e)}
+  finally{loadInFlight=false}
+}
+async function runCheck(k){const j=await post('/api/check/'+k);$(k==='mqtt'?'mqttCheck':k==='arm'?'armCheck':k==='amr'?'amrCheck':'conveyorCheck').textContent=JSON.stringify(j,null,2);toast(`${k} check complete`);await load()}
+async function preflight(){await api('/api/start-broker');await api('/api/connect-mqtt');await runCheck('mqtt');await runCheck('arm');await runCheck('amr');await runCheck('conveyor')}
+async function applySettings(){settingsDirty=false;await api('/api/config',{broker_ip:broker.value,broker_port:Number(port.value),arm_ip:$('armIpInput').value,amr_ip:$('amrIpInput').value,conveyor_ip:$('conveyorIpInput').value,box_capacity:Number(boxCapacity.value),auto_coordinate:(document.getElementById('autoCoordinate')?autoCoordinate.value==='true':true),simulate_amr:false})}
+async function reloadSavedPlan(){settingsDirty=false;await load();toast('Saved connection plan reloaded')}
+async function scanDevices(){await api('/api/discovery/scan');setTimeout(load,1200)}async function applyDiscovery(){settingsDirty=false;await api('/api/discovery/apply')}function forceFilled(c){api('/api/boxes/force-filled',{color:c})}function forceFilledPrompt(){const c=prompt('Color RED/GREEN/BLUE','RED');if(c)forceFilled(c.toUpperCase())}function simulateCubePrompt(){const c=prompt('Cube color RED/GREEN/BLUE','RED');if(c)api('/api/sim/conveyor',{color:c.toUpperCase()})}
+function toggleCalibrationGuide(){$('cvCameraWrap').classList.toggle('calibrating')}
+async function testSorterServo(code){if(!confirm(`The sorter servo will move to ${code}. Is the conveyor clear?`))return;const j=await post('/api/conveyor/servo-test',{code});$('cvServoResult').textContent=JSON.stringify(j,null,2);toast(j.ok?`Sorter moved to ${code}`:`Sorter failed: ${j.err||(j.data&&j.data.err)||'unknown error'}`);await load()}
+function updateSorterSliderValue(angle){$('sorterServoAngleValue').textContent=`${Number(angle)} deg`}
+async function moveSorterServo(angle){updateSorterSliderValue(angle);const j=await post('/api/conveyor/servo-angle',{angle:Number(angle)});$('cvServoResult').textContent=JSON.stringify(j,null,2);toast(j.ok?`Sorter moved to ${j.requestedAngle} degrees`:`Sorter move failed: ${j.err||(j.data&&j.data.err)||'unknown error'}`);await load()}
+async function saveSorterAngle(target){const angle=Number($('sorterServoAngle').value);const j=await post('/api/conveyor/servo-save',{target,angle});$('cvServoResult').textContent=JSON.stringify(j,null,2);toast(j.ok?`${target} sorter position saved at ${angle} degrees`:`Save failed: ${j.err||'unknown error'}`);await load()}
+async function captureColorCalibration(){
+  $('cvCameraWrap').classList.add('calibrating');
+  const color=$('cvCalibrationColor').value;
+  const j=await post('/api/cv/calibrate',{color});
+  $('cvCalibrationResult').textContent=JSON.stringify(j,null,2);
+  toast(j.ok?`${color} camera profile saved`:`Calibration failed: ${j.err||'unknown error'}`);
+  await load();
+}
+async function resetColorCalibration(){
+  const color=$('cvCalibrationColor').value;
+  const j=await post('/api/cv/calibration/reset',{color});
+  $('cvCalibrationResult').textContent=JSON.stringify(j,null,2);
+  toast(j.ok?`${color} learned profile reset`:`Reset failed: ${j.err||'unknown error'}`);
+  await load();
+}
+async function loadWorkflow(){
+  const j=await get('/api/workflow/rules');
+  workflow=j.rules||[];
+
+  let amrRecipes=[];
+  try{
+    const ar=await get('/api/amr/route-recipes');
+    amrRecipes=(ar.data&&ar.data.recipes)||[];
+  }catch(e){amrRecipes=[]}
+
+  const armNames=(j.armRecipes||[]).filter(Boolean);
+
+  function armSelect(i,current){
+    const opts=['<option value="">choose arm recipe</option>'].concat(armNames.map(n=>`<option value="${esc(n)}" ${n===current?'selected':''}>${esc(n)}</option>`));
+    return `<select onchange="if(this.value)document.getElementById('wf_arm_${i}').value=this.value">${opts.join('')}</select>`;
+  }
+
+  function amrSelect(i,currentIdx,currentName){
+    const opts=['<option value="">choose AMR route</option>'].concat(amrRecipes.map(r=>{
+      const label=`${r.idx} - ${r.name||('RECIPE_'+r.idx)} (${r.count||0} steps)`;
+      return `<option value="${r.idx}|${esc(r.name||'')}" ${Number(r.idx)===Number(currentIdx)?'selected':''}>${esc(label)}</option>`;
+    }));
+    return `<select onchange="pickAmrRecipe(${i},this.value)">${opts.join('')}</select>`;
+  }
+
+  const rows=workflow.map((r,i)=>`<tr>
+    <td><select id="wf_en_${i}"><option value="true"${r.enabled?' selected':''}>ON</option><option value="false"${!r.enabled?' selected':''}>OFF</option></select></td>
+    <td><input id="wf_name_${i}" value="${esc(r.flowName||r.name||((r.color||'COLOR')+'_FLOW'))}"></td>
+    <td><input id="wf_color_${i}" value="${esc(r.color)}"></td>
+    <td><input id="wf_box_${i}" value="${esc(r.box)}"></td>
+    <td><input id="wf_filled_${i}" value="${esc(r.filledEvent)}"></td>
+    <td>
+      <input id="wf_arm_${i}" value="${esc(r.recipe)}" list="armRecipeNames">
+      ${armSelect(i,r.recipe)}
+    </td>
+    <td><input type="number" id="wf_delay_arm_${i}" value="${r.delayBeforeArmMs??0}"></td>
+    <td><input id="wf_arm_loaded_${i}" value="${esc(r.armLoadedEvent)}"></td>
+    <td><input id="wf_delivered_${i}" value="${esc(r.deliveredEvent)}"></td>
+  </tr>`).join('');
+
+  const table=`<table class="table">
+    <tr>
+      <th>On</th>
+      <th>System Flow Name</th>
+      <th>Color</th>
+      <th>Box</th>
+      <th>Conveyor Filled Event</th>
+      <th>Arm Recipe</th>
+      <th>Wait before Arm ms</th>
+      <th>Arm Loaded Event</th>
+      <th>Finished Job Event</th>
+    </tr>${rows}</table>
+    <datalist id="armRecipeNames">${armNames.map(n=>`<option value="${esc(n)}"></option>`).join('')}</datalist>`;
+
+  if(document.getElementById('workflowTable')) workflowTable.innerHTML=table;
+
+  const summary=workflow.map(r=>`<div class="card" style="padding:12px;margin-top:10px">
+    <b>${esc(r.flowName||r.name||r.color+'_FLOW')}</b>
+    <div class="mini">${esc(r.color)} / ${esc(r.box)}</div>
+    <div class="mini">Conveyor: ${esc(r.filledEvent)} -> Arm recipe ${esc(r.recipe)} -> ${esc(r.armLoadedEvent)} -> manual AMR delivery -> Finished Job -> ${esc(r.deliveredEvent)}</div>
+  </div>`).join('');
+  if(document.getElementById('workflowSummary')) workflowSummary.innerHTML=summary||'<div class="mini">No system flows.</div>';
+}
+
+function pickAmrRecipe(i,val){
+  if(!val)return;
+  const parts=String(val).split('|');
+  const idx=parts[0]||'0';
+  const name=parts.slice(1).join('|')||'';
+  const idxEl=document.getElementById(`wf_amr_${i}`);
+  const nameEl=document.getElementById(`wf_amr_name_${i}`);
+  if(idxEl)idxEl.value=idx;
+  if(nameEl)nameEl.value=name;
+}
+
+async function saveWorkflow(){
+  const rules=workflow.map((r,i)=>({
+    enabled:document.getElementById(`wf_en_${i}`).value==='true',
+    flowName:document.getElementById(`wf_name_${i}`).value,
+    color:document.getElementById(`wf_color_${i}`).value.toUpperCase(),
+    box:document.getElementById(`wf_box_${i}`).value,
+    amrRecipeIndex:r.amrRecipeIndex||0,
+    amrRecipeName:r.amrRecipeName||'',
+    target:r.target||'',
+    delayBeforeAmrMs:r.delayBeforeAmrMs||0,
+    recipe:document.getElementById(`wf_arm_${i}`).value,
+    delayBeforeArmMs:Number(document.getElementById(`wf_delay_arm_${i}`).value||0),
+    filledEvent:document.getElementById(`wf_filled_${i}`).value,
+    armLoadedEvent:document.getElementById(`wf_arm_loaded_${i}`).value,
+    deliveredEvent:document.getElementById(`wf_delivered_${i}`).value,
+    pickedEvent:r.pickedEvent,
+    arrivalEvent:r.arrivalEvent,
+    dockingEvent:r.dockingEvent,
+    readyEvent:r.readyEvent,
+    shelfEvent:r.shelfEvent,
+    pickup:r.pickup
+  }));
+  await api('/api/workflow/rules/save',{rules});
+  await loadWorkflow();
+}
+
+async function addRuleFromSettings(){
+  const raw=(document.getElementById('newRuleColor')?.value||'').trim().toUpperCase();
+  if(!raw){toast('Type a new color first.');return;}
+  await api('/api/workflow/rules/add-default',{color:raw});
+  if(document.getElementById('newRuleColor'))newRuleColor.value='';
+  await loadWorkflow();
+}
+async function scanDevicesCustom(){
+  const subnet=(document.getElementById('scanSubnet')?.value||'192.168.137').trim();
+  await api('/api/discovery/scan',{subnet});
+  setTimeout(load,1200);
+}
+
+function vals(){return{x:Number(amrX.value||0),y:Number(amrY.value||0),th:Number(amrTh.value||0),left:Number(amrLeft.value||0),right:Number(amrRight.value||0),idx:Number(amrRouteIdx.value||0),wait:Number(amrWait.value||300)}}function showAmr(j){amrTestOut.textContent=JSON.stringify(j,null,2)}
+async function finishAmrJob(){const j=await post('/api/amr/finished-job',{});amrFinishResult.textContent=JSON.stringify(j,null,2);toast(j.ok?'Job finished. Checking queue.':`Cannot finish: ${j.err||'unknown error'}`);await load()}
+async function refreshAmrReal(){showAmr(await get('/api/amr/real-status'))}async function amrHttpGo(){showAmr(await api('/api/amr/http-go',vals()))}async function amrHttpDrive(){showAmr(await api('/api/amr/http-drive',vals()))}async function amrHttpDriveStop(){amrLeft.value=0;amrRight.value=0;await amrHttpDrive()}async function amrHttpStop(){showAmr(await api('/api/amr/http-stop',{}))}async function amrHttpResetOdom(){showAmr(await api('/api/amr/http-reset-odom',vals()))}async function amrMqttStatus(){showAmr(await api('/api/amr/mqtt-status-test',{}))}async function amrMqttRunRoute(){showAmr(await api('/api/amr/mqtt-run-recipe-test',vals()))}async function amrMqttPick(c){showAmr(await api('/api/amr/mqtt-pick-color-test',{color:c}))}
+async function refreshAmrRoutes(){const j=await get('/api/amr/route-recipes');showAmr(j);const rs=(j.data&&j.data.recipes)||[];amrRoutesBox.innerHTML=rs.length?rs.map(r=>`<div class="card" style="padding:12px;margin-top:10px"><b>${r.idx} - ${esc(r.name)}</b><div class="mini">${esc(r.color)} | ${esc(r.box)} | ${r.count} steps</div><div class="mini">${(r.steps||[]).map(s=>`#${Number(s.idx)+1}: X${s.x} Y${s.y} TH${s.th} wait ${s.wait}`).join('<br>')||'No steps'}</div></div>`).join(''):'<div class="mini">No AMR routes found.</div>'}async function amrHttpSaveCurrent(){showAmr(await api('/api/amr/http-save-current',vals()));await refreshAmrRoutes()}async function amrHttpRunRoute(){showAmr(await api('/api/amr/http-run-route',vals()))}async function amrHttpDeleteLast(){showAmr(await api('/api/amr/http-delete-last',vals()));await refreshAmrRoutes()}async function amrHttpClearRoute(){if(confirm('Clear selected AMR route?')){showAmr(await api('/api/amr/http-clear-route',vals()));await refreshAmrRoutes()}}
+async function refreshArmStatus(){armCheck.textContent=JSON.stringify(await get('/api/arm/status'),null,2)}async function retryActiveArmJob(){if(!confirm('The arm may move. Is the arm area clear and ready?'))return;const j=await post('/api/arm/retry-active-box',{});armCheck.textContent=JSON.stringify(j,null,2);toast(j.ok?`Retrying ${j.recipe}`:`Retry failed: ${j.err||'unknown error'}`);await load()}async function armLoadRecipe(){const j=await api('/api/arm/load-recipe',{index:Number(armRecipeIndex.value||0),packageClass:armPackageName.value});armCheck.textContent=JSON.stringify(j,null,2)}async function armStartLoaded(){const j=await api('/api/arm/start-loaded',{});armCheck.textContent=JSON.stringify(j,null,2)}async function armRunRecipeTest(){const j=await api('/api/arm/run-recipe-test',{index:Number(armRecipeIndex.value||0),packageClass:armPackageName.value});armCheck.textContent=JSON.stringify(j,null,2)}
+
+async function verifyArmIpHttp80(){
+  const ip = $('armIpInput').value.trim();
+  if(!ip){toast('Type arm IP first');return;}
+  const j = await post('/api/arm/save-ip-and-verify',{ip});
+  settingsDirty=false;
+  if(document.getElementById('ipSaveResult')) ipSaveResult.textContent = JSON.stringify(j,null,2);
+  if(j.connected && j.armState==='NOT_HOMED'){
+    toast('Arm connected. State is NOT_HOMED, not disconnected.');
+  } else {
+    toast(j.connected ? 'Arm connected' : 'Arm HTTP failed');
+  }
+  await load();
+}
+
+async function saveAndTestNodeFromInput(node){
+  const ip = node==='arm' ? $('armIpInput').value.trim() : node==='amr' ? $('amrIpInput').value.trim() : $('conveyorIpInput').value.trim();
+  if(!ip){toast('Type '+node+' IP first');return;}
+  const j = await post('/api/settings/save-and-test-node',{node,ip});
+  settingsDirty=false;
+  if(document.getElementById('ipSaveResult')) ipSaveResult.textContent = JSON.stringify(j,null,2);
+  toast((j.ok?'Saved and connected: ':'Saved but test failed: ')+node+' '+ip);
+  await load();
+}
+
+async function saveRobotIpsAndSettings(){
+  await post('/api/settings/save-and-test-node',{node:'arm',ip:$('armIpInput').value.trim()});
+  await post('/api/settings/save-and-test-node',{node:'amr',ip:$('amrIpInput').value.trim()});
+  await post('/api/settings/save-and-test-node',{node:'conveyor',ip:$('conveyorIpInput').value.trim()});
+  const cfgResp=await post('/api/config',{
+    broker_ip:broker.value,
+    broker_port:Number(port.value),
+    arm_ip:$('armIpInput').value.trim(),
+    amr_ip:$('amrIpInput').value.trim(),
+    conveyor_ip:$('conveyorIpInput').value.trim(),
+    box_capacity:Number(boxCapacity.value),
+    auto_coordinate:(document.getElementById('autoCoordinate')?autoCoordinate.value==='true':true),
+    simulate_amr:false
+  });
+  settingsDirty=false;
+  if(document.getElementById('ipSaveResult')) ipSaveResult.textContent=JSON.stringify({configSave:cfgResp},null,2);
+  toast('All robot IPs saved');
+  await load();
+}
+
+async function clearRobotIps(){
+  if(!confirm('Clear saved Arm / AMR / Conveyor IPs?')) return;
+  const j=await post('/api/settings/clear-ips-force',{});
+  settingsDirty=false;
+  $('armIpInput').value=''; $('amrIpInput').value=''; $('conveyorIpInput').value='';
+  if(document.getElementById('ipSaveResult')) ipSaveResult.textContent=JSON.stringify(j,null,2);
+  toast('Robot IPs cleared');
+  await load();
+}
+
+['broker','port','armIpInput','amrIpInput','conveyorIpInput','boxCapacity','autoCoordinate','simulateAmr','scanSubnet'].forEach(id=>{
+  const el=$(id);
+  if(el)el.addEventListener('input',()=>{settingsDirty=true});
+});
+const requestedPage=new URLSearchParams(location.search).get('page');
+if(requestedPage&&$(requestedPage)){
+  const navButton=[...document.querySelectorAll('nav button')].find(button=>(button.getAttribute('onclick')||'').includes(`'${requestedPage}'`));
+  if(navButton)showPage(requestedPage,navButton);
+}
+setInterval(load,1000);load();loadWorkflow();
+</script>
+</body>
+</html>
